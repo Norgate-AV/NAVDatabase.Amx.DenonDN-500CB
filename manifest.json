@@ -1,0 +1,20 @@
+{
+    "name": "NAVDatabase.Amx.DenonDN-500CB",
+    "description": "NetLinx module for Denon DN-500CB",
+    "version": "1.0.0",
+    "license": "MIT",
+    "files": ["src/*.axs", "src/*.tko", "lib/*.axi", "SymLink.ps1", "LICENSE", "README.md"],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Norgate-AV/NAVDatabase.Amx.DenonDN-500CB.git"
+    },
+    "bugs": {
+        "url": "https://github.com/Norgate-AV/NAVDatabase.Amx.DenonDN-500CB/issues"
+    },
+    "dependencies": [
+        {
+            "version": "^1.25.0",
+            "url": "github.com/Norgate-AV/NAVFoundation.Amx"
+        }
+    ]
+}
