@@ -1,5 +1,5 @@
 MODULE_NAME='mDenonDN-500CB'	(
-                                    dev vdvControl,
+                                    dev vdvObject,
                                     dev dvPort
                                 )
 
@@ -90,8 +90,8 @@ DEFINE_MUTUALLY_EXCLUSIVE
 (* EXAMPLE: DEFINE_FUNCTION <RETURN_TYPE> <NAME> (<PARAMETERS>) *)
 (* EXAMPLE: DEFINE_CALL '<NAME>' (<PARAMETERS>) *)
 define_function SendStringRaw(char cParam[]) {
-     NAVLog(NAVFormatStandardLogMessage(NAV_STANDARD_LOG_MESSAGE_TYPE_STRING_TO, dvPort, cParam))
-    //NAVLog(NAVFormatStandardLogMessage(NAV_STANDARD_LOG_MESSAGE_TYPE_STRING_TO, dvPort, cParam))
+     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, NAVFormatStandardLogMessage(NAV_STANDARD_LOG_MESSAGE_TYPE_STRING_TO, dvPort, cParam))
+    //NAVErrorLog(NAV_LOG_LEVEL_DEBUG, NAVFormatStandardLogMessage(NAV_STANDARD_LOG_MESSAGE_TYPE_STRING_TO, dvPort, cParam))
     send_string dvPort,"cParam"
 }
 
@@ -117,7 +117,7 @@ DEFINE_START {
 DEFINE_EVENT
 define_event data_event[dvPort] {
     online: {
-	if (data.device.number <> 0) {
+	if (data.device.number != 0) {
 	    send_command data.device,"'SET BAUD 9600,N,8,1 485 DISABLE'"
 	    send_command data.device,"'B9MOFF'"
 	    send_command data.device,"'CHARD-0'"
@@ -130,13 +130,13 @@ define_event data_event[dvPort] {
 	}
 
 	//SendStringRaw("NAV_STX,'10000',NAV_ETX") 	//Start RS232
-	[vdvControl,DATA_INITIALIZED] = true
-	[vdvControl,DEVICE_COMMUNICATING] = true
+	[vdvObject,DATA_INITIALIZED] = true
+	[vdvObject,DEVICE_COMMUNICATING] = true
     }
     string: {
 	    iCommunicating = true
-	    [vdvControl,DATA_INITIALIZED] = true
-	    //NAVLog("'String To Bluray: ',data.text")
+	    [vdvObject,DATA_INITIALIZED] = true
+	    //NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'String To Bluray: ',data.text")
     }
     offline: {
 	if (data.device.number == 0) {
@@ -153,11 +153,11 @@ define_event data_event[dvPort] {
     }
 }
 
-data_event[vdvControl] {
+data_event[vdvObject] {
     command: {
 	stack_var char cCmdHeader[NAV_MAX_CHARS]
 	stack_var char cCmdParam[2][NAV_MAX_CHARS]
-	    NAVLog(NAVFormatStandardLogMessage(NAV_STANDARD_LOG_MESSAGE_TYPE_COMMAND_FROM, data.device, data.text))
+	    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, NAVFormatStandardLogMessage(NAV_STANDARD_LOG_MESSAGE_TYPE_COMMAND_FROM, data.device, data.text))
 	    cCmdHeader = DuetParseCmdHeader(data.text)
 	    cCmdParam[1] = DuetParseCmdParam(data.text)
 	    cCmdParam[2] = DuetParseCmdParam(data.text)
@@ -166,11 +166,11 @@ data_event[vdvControl] {
 		    switch (cCmdParam[1]) {
 			case 'IP_ADDRESS': {
 			    cIPAddress = cCmdParam[2]
-			    //timeline_create(TL_IP_CHECK,ltIPCheck,length_array(ltIPCheck),timeline_absolute,timeline_repeat)
+			    //NAVTimelineStart(TL_IP_CHECK,ltIPCheck,timeline_absolute,timeline_repeat)
 			}
 			case 'TCP_PORT': {
 			    iTCPPort = atoi(cCmdParam[2])
-			    timeline_create(TL_IP_CHECK,ltIPCheck,length_array(ltIPCheck),timeline_absolute,timeline_repeat)
+			    NAVTimelineStart(TL_IP_CHECK,ltIPCheck,timeline_absolute,timeline_repeat)
 			}
 		    }
 		}
@@ -180,7 +180,7 @@ data_event[vdvControl] {
     }
 }
 
-define_event channel_event[vdvControl,0] {
+define_event channel_event[vdvObject,0] {
     on: {
 	    switch (channel.channel) {
 		case PLAY: SendString("'2353'")
